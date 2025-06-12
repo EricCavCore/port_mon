@@ -1,0 +1,13 @@
+[Unit]
+Description=Port Monitor that Logs to a file
+After=network.target
+
+[Service]
+WorkingDirectory=/opt/port_mon
+ExecStart=/opt/port_mon/port_mon
+Restart=always
+RestartSec=6
+
+[Install]
+WantedBy=default.target
+RequiredBy=network.target
