@@ -8,6 +8,7 @@ import (
 	"os/signal"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"syscall"
 	"time"
 
@@ -31,9 +32,14 @@ type Target struct {
 	Address   string
 	Protocol  string
 	Alive     bool
+	EventID   uint64
 	LastAlive time.Time
 	TimesDown uint64
 }
+
+var (
+	NextEventID atomic.Uint64
+)
 
 func test_port(addr string, proto string, timeout time.Duration) error {
 	conn, err := net.DialTimeout(proto, addr, timeout)
@@ -58,12 +64,13 @@ func test_all_ports(config Config, targets []Target) {
 			if err != nil && t.Alive {
 				targets[i].Alive = false
 				targets[i].TimesDown++
-				log.Printf(" [DOWN] : %s (%s) is down! [error: %s]\n", t.Name, t.Address, err.Error())
+				targets[i].EventID = NextEventID.Add(1)
+				log.Printf(" [DOWN] (eventID: %d) : %s (%s) is down! [error: %s]\n", targets[i].EventID, t.Name, t.Address, err.Error())
 			} else if err == nil {
 				targets[i].LastAlive = time.Now()
 				if !targets[i].Alive {
 					targets[i].Alive = true
-					log.Printf(" [UP] : %s (%s) is up! Down for %v, been down %d times\n", t.Name, t.Address, (time.Since(t.LastAlive)), t.TimesDown)
+					log.Printf(" [UP] (eventID: %d) : %s (%s) is up! Down for %v, been down %d times\n", t.EventID, t.Name, t.Address, (time.Since(t.LastAlive)), t.TimesDown)
 				}
 			}
 			wg.Done()
@@ -107,6 +114,8 @@ func (c *Config) make_targets() []Target {
 }
 
 func main() {
+	NextEventID.Store(0)
+
 	var config Config
 	config.read_config()
 	targets := config.make_targets()
