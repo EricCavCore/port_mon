@@ -1,6 +1,5 @@
 output:
   file: port_mon.log
-  level: error # [info, error]
 client:
   interval: 3s
   timeout: 1s
@@ -8,3 +7,4 @@ targets:
   google_example: 8.8.8.8:53/udp
   cloudflare_example: 1.1.1.1:53/udp
   failure_example: 192.168.11.45:1/tcp
+  local_example: 127.0.0.1:5000/tcp

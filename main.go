@@ -17,14 +17,22 @@ import (
 
 type Config struct {
 	Output struct {
-		File  *string
-		Level string
+		File *string
 	}
 	Client struct {
 		Interval time.Duration
 		Timeout  time.Duration
 	}
 	Targets map[string]string
+}
+
+type Target struct {
+	Name      string
+	Address   string
+	Protocol  string
+	Alive     bool
+	LastAlive time.Time
+	TimesDown uint64
 }
 
 func test_port(addr string, proto string, timeout time.Duration) error {
@@ -40,18 +48,23 @@ func test_port(addr string, proto string, timeout time.Duration) error {
 	}
 }
 
-func test_all_ports(config Config) {
+func test_all_ports(config Config, targets []Target) {
 	wg := sync.WaitGroup{}
 
-	for name, target := range config.Targets {
+	for i, t := range targets {
 		wg.Add(1)
 		go func() {
-			sections := strings.Split(target, "/")
-			err := test_port(sections[0], sections[1], config.Client.Timeout)
-			if err != nil {
-				log.Printf(" [DOWN] : %s (%s) is down! [error: %s]\n", name, target, err.Error())
-			} else if config.Output.Level == "info" {
-				log.Printf(" [UP] : %s (%s) is up!\n", name, target)
+			err := test_port(t.Address, t.Protocol, config.Client.Timeout)
+			if err != nil && t.Alive {
+				targets[i].Alive = false
+				targets[i].TimesDown++
+				log.Printf(" [DOWN] : %s (%s) is down! [error: %s]\n", t.Name, t.Address, err.Error())
+			} else if err == nil {
+				targets[i].LastAlive = time.Now()
+				if !targets[i].Alive {
+					targets[i].Alive = true
+					log.Printf(" [UP] : %s (%s) is up! Down for %v, been down %d times\n", t.Name, t.Address, (time.Since(t.LastAlive)), t.TimesDown)
+				}
 			}
 			wg.Done()
 		}()
@@ -75,9 +88,28 @@ func (c *Config) read_config() {
 	}
 }
 
+func (c *Config) make_targets() []Target {
+	var targets []Target
+	for name, addr_proto := range c.Targets {
+		sections := strings.Split(addr_proto, "/")
+
+		targets = append(targets, Target{
+			Name:      name,
+			Address:   sections[0],
+			Protocol:  sections[1],
+			Alive:     true,
+			LastAlive: time.Now(),
+			TimesDown: 0,
+		})
+	}
+
+	return targets
+}
+
 func main() {
 	var config Config
 	config.read_config()
+	targets := config.make_targets()
 
 	if config.Output.File != nil {
 		fmt.Printf("logging to file: %s\n", *config.Output.File)
@@ -94,7 +126,7 @@ func main() {
 		log.Fatalf("could not get scheduler: %s\n", err.Error())
 	}
 
-	j, err := s.NewJob(gocron.DurationJob(config.Client.Interval), gocron.NewTask(test_all_ports, config))
+	j, err := s.NewJob(gocron.DurationJob(config.Client.Interval), gocron.NewTask(test_all_ports, config, targets))
 	if err != nil {
 		log.Fatalf("failed to allocate a job for testing ports")
 	}
