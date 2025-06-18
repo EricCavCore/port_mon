@@ -1,0 +1,15 @@
+2025/06/18 12:33:50 created job ([174 204 62 192 111 179 69 224 154 207 165 250 42 125 192 163]) which runs every 3s
+2025/06/18 12:34:06 created job ([118 21 191 104 152 92 70 26 152 34 211 85 170 214 239 143]) which runs every 3s
+2025/06/18 12:35:49 created job ([196 234 189 154 69 91 78 54 191 161 44 141 238 108 201 44]) which runs every 3s
+2025/06/18 12:41:53 created job ([99 45 254 66 10 222 77 61 133 57 186 125 17 198 185 251]) which runs every 3s
+2025/06/18 12:42:34 created job ([183 169 3 162 125 254 77 154 142 192 29 126 94 139 35 143]) which runs every 3s
+2025/06/18 12:42:56 created job ([30 176 61 39 21 76 64 94 175 37 90 135 225 159 235 185]) which runs every 3s
+2025/06/18 12:42:59  [UP] (eventID: 0) : cloudflare_example (1.1.1.1:53) is up! Down for 186ns, been down 0 times
+2025/06/18 12:42:59  [UP] (eventID: 0) : google_example (8.8.8.8:53) is up! Down for 203ns, been down 0 times
+2025/06/18 12:45:25 created job ([231 192 134 26 54 85 66 124 163 194 194 135 72 39 125 159]) which runs every 3s
+2025/06/18 12:45:28  [UP] (eventID: 0) : cloudflare_example (1.1.1.1:53) is up! Down for 72ns, been down 0 times
+2025/06/18 12:45:28  [UP] (eventID: 0) : google_example (8.8.8.8:53) is up! Down for 42ns, been down 0 times
+2025/06/18 12:46:19  [UP] (eventID: 0) : local_example (127.0.0.1:5000) is up! Down for 57ns, been down 0 times
+2025/06/18 12:46:28  [DOWN] (eventID: 1) : local_example (127.0.0.1:5000) is down! [error: dial tcp 127.0.0.1:5000: connect: connection refused]
+2025/06/18 12:46:40  [UP] (eventID: 1) : local_example (127.0.0.1:5000) is up! Down for 110ns, been down 1 times
+2025/06/18 12:46:46  [DOWN] (eventID: 2) : local_example (127.0.0.1:5000) is down! [error: dial tcp 127.0.0.1:5000: connect: connection refused]

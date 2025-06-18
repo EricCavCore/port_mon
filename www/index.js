@@ -33,7 +33,12 @@ function build_table(data) {
         row.appendChild(construct_td(target['Protocol']));
         row.appendChild(construct_up_or_down(target['Alive']));
 
-        let last_alive = new Date(target['LastAlive']);
+        let last_alive;
+        if (target['LastAlive'] != null) {
+            last_alive = new Date(target['LastAlive']);
+        } else {
+            last_alive = "Never";
+        }
         row.appendChild(construct_td(last_alive));
         row.appendChild(construct_td(target['TimesDown']));
 
