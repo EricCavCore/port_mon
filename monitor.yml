@@ -1,5 +1,6 @@
 output:
   file: port_mon.log
+  web: 0.0.0.0:8080
 client:
   interval: 3s
   timeout: 1s

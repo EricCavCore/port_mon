@@ -1,9 +1,11 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net"
+	"net/http"
 	"os"
 	"os/signal"
 	"strings"
@@ -19,6 +21,7 @@ import (
 type Config struct {
 	Output struct {
 		File *string
+		Web  *string
 	}
 	Client struct {
 		Interval time.Duration
@@ -147,6 +150,25 @@ func main() {
 	fmt.Printf("\n")
 
 	s.Start()
+
+	go func() {
+		http.HandleFunc("/stats", func(w http.ResponseWriter, r *http.Request) {
+			t_data, err := json.MarshalIndent(targets, "", "    ")
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Write([]byte("Failed the marshal data"))
+				return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			w.Write(t_data)
+		})
+
+		err := http.ListenAndServe(*config.Output.Web, nil)
+		if err != nil {
+			log.Fatalf("http server crashed: %s\n", err.Error())
+		}
+	}()
 
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
