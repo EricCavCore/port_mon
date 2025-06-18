@@ -164,6 +164,8 @@ func main() {
 			w.Write(t_data)
 		})
 
+		http.Handle("/", http.FileServer(http.Dir("www")))
+
 		err := http.ListenAndServe(*config.Output.Web, nil)
 		if err != nil {
 			log.Fatalf("http server crashed: %s\n", err.Error())
