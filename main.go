@@ -156,7 +156,7 @@ func main() {
 			t_data, err := json.MarshalIndent(targets, "", "    ")
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
-				w.Write([]byte("Failed the marshal data"))
+				w.Write([]byte("Failed to marshal data"))
 				return
 			}
 			w.Header().Set("Content-Type", "application/json")
