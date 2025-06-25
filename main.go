@@ -36,7 +36,8 @@ type Target struct {
 	Protocol  string
 	Alive     bool
 	EventID   uint64
-	LastAlive *time.Time
+	LastUp    *time.Time
+	LastDown  *time.Time
 	TimesDown uint64
 }
 
@@ -68,15 +69,19 @@ func test_all_ports(config Config, targets []Target) {
 				targets[i].Alive = false
 				targets[i].TimesDown++
 				targets[i].EventID = NextEventID.Add(1)
+				if targets[i].LastDown == nil {
+					targets[i].LastDown = new(time.Time)
+				}
+				*targets[i].LastDown = time.Now()
 				log.Printf(" [DOWN] (eventID: %d) : %s (%s) is down! [error: %s]\n", targets[i].EventID, t.Name, t.Address, err.Error())
 			} else if err == nil {
-				if targets[i].LastAlive == nil {
-					targets[i].LastAlive = new(time.Time)
+				if targets[i].LastUp == nil {
+					targets[i].LastUp = new(time.Time)
 				}
-				*targets[i].LastAlive = time.Now()
-				if !targets[i].Alive && targets[i].LastAlive != nil {
+				*targets[i].LastUp = time.Now()
+				if !targets[i].Alive && targets[i].LastUp != nil {
 					targets[i].Alive = true
-					log.Printf(" [UP] (eventID: %d) : %s (%s) is up! Down for %v, been down %d times\n", t.EventID, t.Name, t.Address, (time.Since(*targets[i].LastAlive)), t.TimesDown)
+					log.Printf(" [UP] (eventID: %d) : %s (%s) is up! Down for %v, been down %d times\n", t.EventID, t.Name, t.Address, (time.Since(*targets[i].LastUp)), t.TimesDown)
 				}
 			}
 			wg.Done()
@@ -111,7 +116,7 @@ func (c *Config) make_targets() []Target {
 			Address:   sections[0],
 			Protocol:  sections[1],
 			Alive:     false,
-			LastAlive: nil,
+			LastUp:    nil,
 			TimesDown: 0,
 		})
 	}

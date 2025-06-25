@@ -34,12 +34,21 @@ function build_table(data) {
         row.appendChild(construct_up_or_down(target['Alive']));
 
         let last_alive;
-        if (target['LastAlive'] != null) {
-            last_alive = new Date(target['LastAlive']);
+        if (target['LastUp'] != null) {
+            last_alive = new Date(target['LastUp']);
         } else {
             last_alive = "Never";
         }
         row.appendChild(construct_td(last_alive));
+
+        let last_down;
+        if (target['LastDown'] != null) {
+            last_down = new Date(target['LastDown']);
+        } else {
+            last_down = "Never";
+        }
+        row.appendChild(construct_td(last_down));
+
         row.appendChild(construct_td(target['TimesDown']));
 
         table_body.appendChild(row);
