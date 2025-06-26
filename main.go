@@ -22,7 +22,7 @@ type Config struct {
 	Output struct {
 		File       *string
 		Web        *string
-		MaxHistory int
+		MaxHistory int `yaml:"max_history"`
 	}
 	Client struct {
 		Interval time.Duration
