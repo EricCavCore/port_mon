@@ -20,8 +20,9 @@ import (
 
 type Config struct {
 	Output struct {
-		File *string
-		Web  *string
+		File       *string
+		Web        *string
+		MaxHistory int
 	}
 	Client struct {
 		Interval time.Duration
@@ -38,7 +39,7 @@ type Target struct {
 	EventID   uint64
 	LastUp    *time.Time
 	LastDown  *time.Time
-	TimesDown uint64
+	TimesDown []time.Time
 }
 
 var (
@@ -67,7 +68,9 @@ func test_all_ports(config Config, targets []Target) {
 			err := test_port(t.Address, t.Protocol, config.Client.Timeout)
 			if err != nil && t.Alive {
 				targets[i].Alive = false
-				targets[i].TimesDown++
+				if len(targets[i].TimesDown) < config.Output.MaxHistory {
+					targets[i].TimesDown = append(targets[i].TimesDown, time.Now())
+				}
 				targets[i].EventID = NextEventID.Add(1)
 				if targets[i].LastDown == nil {
 					targets[i].LastDown = new(time.Time)
@@ -81,7 +84,7 @@ func test_all_ports(config Config, targets []Target) {
 				*targets[i].LastUp = time.Now()
 				if !targets[i].Alive && targets[i].LastUp != nil {
 					targets[i].Alive = true
-					log.Printf(" [UP] (eventID: %d) : %s (%s) is up! Down for %v, been down %d times\n", t.EventID, t.Name, t.Address, (time.Since(*targets[i].LastUp)), t.TimesDown)
+					log.Printf(" [UP] (eventID: %d) : %s (%s) is up! Down for %v, been down %d times\n", t.EventID, t.Name, t.Address, (time.Since(*targets[i].LastUp)), len(t.TimesDown))
 				}
 			}
 			wg.Done()
@@ -117,7 +120,7 @@ func (c *Config) make_targets() []Target {
 			Protocol:  sections[1],
 			Alive:     false,
 			LastUp:    nil,
-			TimesDown: 0,
+			TimesDown: []time.Time{},
 		})
 	}
 
